@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>AngularJS Starfield by T.D. Stoneheart</title>
+    <script src="angular.min.js"></script>
+    <style>
+      body {
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        overflow: hidden;
+      }
+
+      #starfield-center {
+        position: absolute;
+        left: calc(100% / 2);
+        top: calc(100% / 2);
+      }
+
+      #starfield-center .star {
+        position: absolute;
+      }
+
+      #starfield-center .star::after {
+        content: '.';
+      }
+    </style>
+  </head>
+  <body ng-app="starfieldApp" ng-controller="starfieldController">
+    <div id="starfield-center">
+      <span class="star" ng-repeat="star in stars" ng-style="star.style"></span>
+    </div>
+
+    <script>
+      angular.module('starfieldApp', []).controller('starfieldController', [
+        '$scope',
+        '$interval',
+        function ($scope, $interval) {
+          const FRAME_INTERVAL = 40;
+          const STARS_PER_SECOND = 10;
+          const INITIAL_SIZE = 2;
+          const INITIAL_DISTANCE = 1;
+          const STAR_SPEED = 1.05;
+          const STAR_GROWTH = 0.65;
+          const MINIMUM_DISTANCE_FACTOR = 0.05;
+
+          class Star {
+            angle = 0;
+            distance = INITIAL_DISTANCE;
+            size = INITIAL_SIZE;
+            color = 'white';
+
+            constructor() {
+              this.angle = generateAngle();
+              this.color = generateColor();
+            }
+
+            get x() {
+              return Math.cos(this.angle) * this.distance;
+            }
+
+            get y() {
+              return Math.sin(this.angle) * this.distance;
+            }
+
+            get style() {
+              return {
+                'left': this.x + 'px',
+                'top': this.y + 'px',
+                'font-size': this.size + 'px',
+                'color': this.color,
+                'visibility':
+                  this.distance >= getMinimumDistance() ? 'visible' : 'hidden',
+              };
+            }
+          }
+
+          $scope.stars = [];
+          $interval(renderStarfield, FRAME_INTERVAL);
+
+          function renderStarfield() {
+            const newStars = [];
+            const newStarsLength = FRAME_INTERVAL / (1000 / STARS_PER_SECOND);
+            for (let i = 0; i < newStarsLength; ++i) {
+              newStars.push(new Star());
+            }
+
+            $scope.stars = $scope.stars
+              .filter(isInsideViewport)
+              .concat(newStars);
+
+            for (star of $scope.stars) {
+              star.distance *= STAR_SPEED;
+              star.size = star.distance ** STAR_GROWTH;
+            }
+          }
+
+          function getMinimumDistance() {
+            return (
+              Math.min(window.innerWidth, window.innerHeight) *
+              MINIMUM_DISTANCE_FACTOR
+            );
+          }
+
+          function generateAngle() {
+            return Math.random() * 2 * Math.PI;
+          }
+
+          function generateColor() {
+            return (
+              '#' +
+              (
+                '000000' + Math.floor(2 ** 24 * Math.random()).toString(16)
+              ).slice(-6)
+            );
+          }
+
+          function isInsideViewport(star) {
+            return (
+              star.x <= window.innerWidth / 2 &&
+              star.y <= window.innerHeight / 2
+            );
+          }
+        },
+      ]);
+    </script>
+  </body>
+</html>
