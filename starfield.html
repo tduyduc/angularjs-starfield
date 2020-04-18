@@ -37,23 +37,22 @@
         '$scope',
         '$interval',
         function ($scope, $interval) {
-          const FRAME_INTERVAL = 40;
+          const FRAME_INTERVAL = 30;
           const STARS_PER_SECOND = 10;
-          const INITIAL_SIZE = 2;
-          const INITIAL_DISTANCE = 1;
-          const STAR_SPEED = 1.05;
-          const STAR_GROWTH = 0.65;
-          const MINIMUM_DISTANCE_FACTOR = 0.05;
 
           class Star {
+            static INITIAL_DISTANCE = 1;
+            static SPEED = 1.07;
+            static GROWTH = 0.69;
+            static MINIMUM_DISTANCE_FACTOR = 0.04;
+
             angle = 0;
-            distance = INITIAL_DISTANCE;
-            size = INITIAL_SIZE;
+            distance = Star.INITIAL_DISTANCE;
             color = 'white';
 
             constructor() {
-              this.angle = generateAngle();
-              this.color = generateColor();
+              this.angle = Star.generateAngle();
+              this.color = Star.generateColor();
             }
 
             get x() {
@@ -64,6 +63,10 @@
               return Math.sin(this.angle) * this.distance;
             }
 
+            get size() {
+              return this.distance ** Star.GROWTH;
+            }
+
             get style() {
               return {
                 'left': this.x + 'px',
@@ -71,8 +74,32 @@
                 'font-size': this.size + 'px',
                 'color': this.color,
                 'visibility':
-                  this.distance >= getMinimumDistance() ? 'visible' : 'hidden',
+                  this.distance >= Star.minimumDistance ? 'visible' : 'hidden',
               };
+            }
+
+            static get minimumDistance() {
+              return (
+                Math.min(window.innerWidth, window.innerHeight) *
+                Star.MINIMUM_DISTANCE_FACTOR
+              );
+            }
+
+            static generateAngle() {
+              return Math.random() * 2 * Math.PI;
+            }
+
+            static generateColor() {
+              return (
+                '#' +
+                (
+                  '000000' + Math.floor(2 ** 24 * Math.random()).toString(16)
+                ).slice(-6)
+              );
+            }
+
+            move() {
+              this.distance *= Star.SPEED;
             }
           }
 
@@ -90,30 +117,7 @@
               .filter(isInsideViewport)
               .concat(newStars);
 
-            for (star of $scope.stars) {
-              star.distance *= STAR_SPEED;
-              star.size = star.distance ** STAR_GROWTH;
-            }
-          }
-
-          function getMinimumDistance() {
-            return (
-              Math.min(window.innerWidth, window.innerHeight) *
-              MINIMUM_DISTANCE_FACTOR
-            );
-          }
-
-          function generateAngle() {
-            return Math.random() * 2 * Math.PI;
-          }
-
-          function generateColor() {
-            return (
-              '#' +
-              (
-                '000000' + Math.floor(2 ** 24 * Math.random()).toString(16)
-              ).slice(-6)
-            );
+            for (star of $scope.stars) star.move();
           }
 
           function isInsideViewport(star) {
