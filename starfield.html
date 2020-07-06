@@ -33,112 +33,113 @@
     </div>
 
     <script>
-      angular.module('starfieldApp', []).controller('starfieldController', [
-        '$scope',
-        '$interval',
-        function ($scope, $interval) {
-          const FRAME_INTERVAL = 30;
-          const STARS_PER_SECOND = 10;
+      angular
+        .module('starfieldApp', [])
+        .controller('starfieldController', [
+          '$scope',
+          '$interval',
+          starfieldController,
+        ]);
 
-          class Star {
-            static get INITIAL_DISTANCE() {
-              return 1;
-            }
-            static get SPEED() {
-              return 1.07;
-            }
-            static get GROWTH() {
-              return 0.69;
-            }
-            static get MINIMUM_DISTANCE_FACTOR() {
-              return 0.03;
-            }
+      function starfieldController($scope, $interval) {
+        const FRAME_INTERVAL = 30;
+        const STARS_PER_SECOND = 10;
 
-            angle = 0;
-            distance = Star.INITIAL_DISTANCE;
-            color = 'white';
-
-            constructor() {
-              this.angle = Star.generateAngle();
-              this.color = Star.generateColor();
-            }
-
-            get x() {
-              return Math.cos(this.angle) * this.distance;
-            }
-
-            get y() {
-              return Math.sin(this.angle) * this.distance;
-            }
-
-            get size() {
-              return this.distance ** Star.GROWTH;
-            }
-
-            get style() {
-              return {
-                'left': this.x + 'px',
-                'top': this.y + 'px',
-                'font-size': this.size + 'px',
-                'color': this.color,
-                'opacity': Math.min(
-                  (this.distance / Star.minimumDistance) ** 2,
-                  1
-                ),
-              };
-            }
-
-            static get minimumDistance() {
-              return (
-                Math.min(window.innerWidth, window.innerHeight) *
-                Star.MINIMUM_DISTANCE_FACTOR
-              );
-            }
-
-            static generateAngle() {
-              return Math.random() * 2 * Math.PI;
-            }
-
-            static generateColor() {
-              return '#'.concat(
-                (
-                  '000000' + Math.floor(2 ** 24 * Math.random()).toString(16)
-                ).slice(-6)
-              );
-            }
-
-            move() {
-              this.distance *= Star.SPEED;
-            }
+        class Star {
+          static get INITIAL_DISTANCE() {
+            return 1;
+          }
+          static get SPEED() {
+            return 1.07;
+          }
+          static get GROWTH() {
+            return 0.69;
+          }
+          static get MINIMUM_DISTANCE_FACTOR() {
+            return 0.03;
           }
 
-          $scope.stars = [];
-          $interval(renderStarfield, FRAME_INTERVAL);
+          angle = 0;
+          distance = Star.INITIAL_DISTANCE;
+          color = 'white';
 
-          function renderStarfield() {
-            const newStarsLength = Math.max(
-              Math.round(FRAME_INTERVAL / (1000 / STARS_PER_SECOND)),
-              1
-            );
-            const newStars = Array(newStarsLength)
-              .fill(() => new Star())
-              .map(construct => construct());
-
-            $scope.stars = $scope.stars
-              .filter(isInsideViewport)
-              .concat(newStars);
-
-            for (star of $scope.stars) star.move();
+          constructor() {
+            this.angle = Star.generateAngle();
+            this.color = Star.generateColor();
           }
 
-          function isInsideViewport(star) {
+          get x() {
+            return Math.cos(this.angle) * this.distance;
+          }
+
+          get y() {
+            return Math.sin(this.angle) * this.distance;
+          }
+
+          get size() {
+            return this.distance ** Star.GROWTH;
+          }
+
+          get style() {
+            return {
+              'left': this.x + 'px',
+              'top': this.y + 'px',
+              'font-size': this.size + 'px',
+              'color': this.color,
+              'opacity': Math.min(
+                (this.distance / Star.minimumDistance) ** 2,
+                1
+              ),
+            };
+          }
+
+          static get minimumDistance() {
             return (
-              star.x <= window.innerWidth / 2 &&
-              star.y <= window.innerHeight / 2
+              Math.min(window.innerWidth, window.innerHeight) *
+              Star.MINIMUM_DISTANCE_FACTOR
             );
           }
-        },
-      ]);
+
+          static generateAngle() {
+            return Math.random() * 2 * Math.PI;
+          }
+
+          static generateColor() {
+            return '#'.concat(
+              (
+                '000000' + Math.floor(2 ** 24 * Math.random()).toString(16)
+              ).slice(-6)
+            );
+          }
+
+          move() {
+            this.distance *= Star.SPEED;
+          }
+        }
+
+        $scope.stars = [];
+        $interval(renderStarfield, FRAME_INTERVAL);
+
+        function renderStarfield() {
+          const newStarsLength = Math.max(
+            Math.round(FRAME_INTERVAL / (1000 / STARS_PER_SECOND)),
+            1
+          );
+          const newStars = Array(newStarsLength)
+            .fill(() => new Star())
+            .map(construct => construct());
+
+          $scope.stars = $scope.stars.filter(isInsideViewport).concat(newStars);
+
+          for (star of $scope.stars) star.move();
+        }
+
+        function isInsideViewport(star) {
+          return (
+            star.x <= window.innerWidth / 2 && star.y <= window.innerHeight / 2
+          );
+        }
+      }
     </script>
   </body>
 </html>
