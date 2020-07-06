@@ -41,10 +41,18 @@
           const STARS_PER_SECOND = 10;
 
           class Star {
-            static INITIAL_DISTANCE = 1;
-            static SPEED = 1.07;
-            static GROWTH = 0.69;
-            static MINIMUM_DISTANCE_FACTOR = 0.04;
+            static get INITIAL_DISTANCE() {
+              return 1;
+            }
+            static get SPEED() {
+              return 1.07;
+            }
+            static get GROWTH() {
+              return 0.78;
+            }
+            static get MINIMUM_DISTANCE_FACTOR() {
+              return 0.03;
+            }
 
             angle = 0;
             distance = Star.INITIAL_DISTANCE;
@@ -73,8 +81,10 @@
                 'top': this.y + 'px',
                 'font-size': this.size + 'px',
                 'color': this.color,
-                'visibility':
-                  this.distance >= Star.minimumDistance ? 'visible' : 'hidden',
+                'opacity': Math.min(
+                  (this.distance / Star.minimumDistance) ** 2,
+                  1
+                ),
               };
             }
 
@@ -90,8 +100,7 @@
             }
 
             static generateColor() {
-              return (
-                '#' +
+              return '#'.concat(
                 (
                   '000000' + Math.floor(2 ** 24 * Math.random()).toString(16)
                 ).slice(-6)
@@ -107,11 +116,13 @@
           $interval(renderStarfield, FRAME_INTERVAL);
 
           function renderStarfield() {
-            const newStars = [];
-            const newStarsLength = FRAME_INTERVAL / (1000 / STARS_PER_SECOND);
-            for (let i = 0; i < newStarsLength; ++i) {
-              newStars.push(new Star());
-            }
+            const newStarsLength = Math.max(
+              Math.round(FRAME_INTERVAL / (1000 / STARS_PER_SECOND)),
+              1
+            );
+            const newStars = Array(newStarsLength)
+              .fill(() => new Star())
+              .map(construct => construct());
 
             $scope.stars = $scope.stars
               .filter(isInsideViewport)
