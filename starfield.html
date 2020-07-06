@@ -58,6 +58,9 @@
           static get MINIMUM_DISTANCE_FACTOR() {
             return 0.03;
           }
+          static get ALPHA_EXPONENT() {
+            return 2;
+          }
 
           distance = Star.INITIAL_DISTANCE;
           angle = Star.generateAngle();
@@ -84,7 +87,7 @@
               'font-size': this.size + 'px',
               'color': this.color,
               'opacity': Math.min(
-                (this.distance / Star.minimumDistance) ** 2,
+                (this.distance / Star.minimumDistance) ** Star.ALPHA_EXPONENT,
                 1
               ),
             };
