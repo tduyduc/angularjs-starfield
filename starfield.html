@@ -59,14 +59,11 @@
             return 0.03;
           }
 
-          angle = 0;
           distance = Star.INITIAL_DISTANCE;
-          color = 'white';
+          angle = Star.generateAngle();
+          color = Star.generateColor();
 
-          constructor() {
-            this.angle = Star.generateAngle();
-            this.color = Star.generateColor();
-          }
+          constructor() {}
 
           get x() {
             return Math.cos(this.angle) * this.distance;
